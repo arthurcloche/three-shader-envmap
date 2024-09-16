@@ -3,12 +3,11 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GUI } from "three/addons/libs/lil-gui.module.min.js";
 import { EquirectangularRenderer } from "./components/equiRect.js";
 
-(async () => {
+await (async () => {
   const container = document.createElement("div"); // Create a container for the renderer
   document.body.appendChild(container); // Append the container to the body
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xff0000);
 
   const camera = new THREE.PerspectiveCamera(
     75,
@@ -19,6 +18,7 @@ import { EquirectangularRenderer } from "./components/equiRect.js";
   camera.position.z = 6; // Move the camera away from the sphere
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.setSize(window.innerWidth, window.innerHeight);
   container.appendChild(renderer.domElement);
 
@@ -28,7 +28,9 @@ import { EquirectangularRenderer } from "./components/equiRect.js";
   );
   envMap.mapping = THREE.EquirectangularReflectMapping;
   envMap.colorSpace = THREE.SRGBColorSpace;
-  const bluenoise = textureLoader.load("./bluenoise.png");
+  const bluenoise = textureLoader.load(
+    "https://cdn.shopify.com/s/files/1/0817/9308/9592/files/cb49c003b454385aa9975733aff4571c62182ccdda480aaba9a8d250014f00ec.png?v=1726273875"
+  );
   bluenoise.wrapS = THREE.RepeatWrapping;
   bluenoise.wrapT = THREE.RepeatWrapping;
 
@@ -168,5 +170,17 @@ import { EquirectangularRenderer } from "./components/equiRect.js";
     camera.aspect = window.innerWidth / window.innerHeight; // Update camera aspect ratio
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight); // Update renderer size
+  });
+
+  const gui = new GUI({ width: 300 });
+  const params = { Refraction: false };
+  gui.add(params, "Refraction").onChange(function (value) {
+    if (value) {
+      shaderMaterial.uniforms.tOrientation.value = true;
+    } else {
+      shaderMaterial.uniforms.tOrientation.value = false;
+    }
+
+    shaderMaterial.needsUpdate = true;
   });
 })();
