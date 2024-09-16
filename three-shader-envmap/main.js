@@ -78,12 +78,27 @@ await (async () => {
     const float PI = 3.141592653589793;
     uniform sampler2D tMap;
     
-    vec2 fromSpherical(vec3 position){
+    vec2 reflectionFromSpherical(vec3 position){
       float theta = asin(position.y);
       float phi = atan(position.z, position.x);
       return vec2(1.-(phi + PI) / (2.0 * PI), (theta + PI / 2.0) / PI);
 
-
+      // return vec2( atan(position.z, position.x) / (2.0 * PI) + .5, 
+      // 1.0 - acos(position.y) / PI);
+    } 
+    vec2 refractionFromSpherical(vec3 position){
+      float theta = asin(position.y);
+      float phi = atan(position.z, position.x);
+      return vec2(1.-(phi + PI) / (2.0 * PI), (theta + PI / 2.0) / PI);
+      
+      // return vec2( atan(position.z, position.x) / (2.0 * PI) + .5, 
+      // 1.0 - acos(position.y) / PI);
+    }
+      vec2 fromSpherical(vec3 position){
+      float theta = asin(position.y);
+      float phi = atan(position.z, position.x);
+      return vec2(1.-(phi + PI) / (2.0 * PI), (theta + PI / 2.0) / PI);
+      
       // return vec2( atan(position.z, position.x) / (2.0 * PI) + .5, 
       // 1.0 - acos(position.y) / PI);
     } 
@@ -91,7 +106,18 @@ await (async () => {
       vec2 coord = fromSpherical(normal);
       return texture(bg, (coord));
     }
+    vec3 toneMapFilmic(vec3 color) {
+    // Filmic tone mapping
+    float a = 0.15; // Exposure
+    float b = 0.50; // Contrast
+    float c = 0.10; // Brightness
+    float d = 0.20; // Saturation
+    float e = 0.02; // White point
 
+    color = color * a / (color * (1.0 + b) + c);
+    color = color / (color + vec3(e));
+    return color;
+}
     void main() {
         vec3 view = normalize(cameraPosition-vPosition);
         vec3 light = vec3(0.5, 0.2, 1.0);
@@ -99,9 +125,11 @@ await (async () => {
         vec3 material = vec3(0.0, 0.0, 0.0); 
         float dProd = dot(vNormal, normalize(light));
       
-        vec3 reflection = tOrientation ? reflect(-view, vNormal) : refract(-view, vNormal,  -1./1.5);
+        vec3 reflection = tOrientation ? reflect(-view, vNormal) : refract(-view, vNormal,  0.01);
         vec4 envColor = sampleSphere(reflection, tMap);
         //envColor = texture(tMap, reflection.rg);
+        //envColor.rgb = toneMapFilmic(envColor.rgb);
+        envColor.rgb = pow(envColor.rgb, vec3(1.0 / 2.2));
         gl_FragColor = envColor;
       }
     `,
@@ -173,8 +201,8 @@ await (async () => {
   });
 
   const gui = new GUI({ width: 300 });
-  const params = { Refraction: false };
-  gui.add(params, "Refraction").onChange(function (value) {
+  const params = { "Refraction/Reflection": false };
+  gui.add(params, "Refraction/Reflection").onChange(function (value) {
     if (value) {
       shaderMaterial.uniforms.tOrientation.value = true;
     } else {
