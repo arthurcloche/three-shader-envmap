@@ -3,7 +3,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GUI } from "three/addons/libs/lil-gui.module.min.js";
 import { EquirectangularRenderer } from "./components/equiRect.js";
 
-await (async () => {
+(async () => {
   const container = document.createElement("div"); // Create a container for the renderer
   document.body.appendChild(container); // Append the container to the body
 
