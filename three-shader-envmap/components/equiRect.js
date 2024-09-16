@@ -63,7 +63,7 @@ export class EquirectangularRenderer {
             position /= distance * 0.2;
             position.xz *= mat2(cos(time * 0.2 + vec4(0.0, 33.0, 11.0, 0.0)));
 
-            noiseOffset = min(distance - 0.3, texture2D(bluenoise, uv).r * 0.05) + 0.1;
+            noiseOffset = min(distance - 0.3, texture2D(bluenoise, coord).r * 0.05) + 0.1;
             radius += noiseOffset;
             float glow = sin(position.x + cos(position.y) * cos(position.z)) * sin(position.z + sin(position.y) * cos(position.x + time));
             color += 0.05 / (0.4 + noiseOffset) 
