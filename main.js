@@ -48,7 +48,7 @@ import { EquirectangularRenderer } from "./components/equiRect.js";
     side: THREE.BackSide,
   });
   const skye = new THREE.Mesh(skyeGeometry, skyeMaterial);
-  scene.add(skye);
+
   // Sphere
   const geometry = new THREE.SphereGeometry(1, 32, 32); // Radius of 1
 
@@ -56,7 +56,7 @@ import { EquirectangularRenderer } from "./components/equiRect.js";
     uniforms: {
       time: { value: 1.0 },
       tMap: { value: null },
-      tOrientation: { value: false },
+      tOrientation: { value: true },
     },
     vertexShader: `
       varying vec3 vNormal;
@@ -201,7 +201,7 @@ import { EquirectangularRenderer } from "./components/equiRect.js";
   });
 
   const gui = new GUI({ width: 300 });
-  const params = { "Refraction/Reflection": false };
+  const params = { "Refraction/Reflection": true, "Show Env": false };
   gui.add(params, "Refraction/Reflection").onChange(function (value) {
     if (value) {
       shaderMaterial.uniforms.tOrientation.value = true;
@@ -210,5 +210,12 @@ import { EquirectangularRenderer } from "./components/equiRect.js";
     }
 
     shaderMaterial.needsUpdate = true;
+  });
+  gui.add(params, "Show Env").onChange(function (value) {
+    if (value) {
+      scene.add(skye);
+    } else {
+      scene.remove(skye);
+    }
   });
 })();
